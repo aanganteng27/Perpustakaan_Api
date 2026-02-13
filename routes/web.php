@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
-
+use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Admin\BookAdminController;
 use App\Http\Controllers\Admin\LoanAdminController;
@@ -110,4 +110,24 @@ Route::prefix('admin')->group(function () {
         // 🔥 Tambahan Route Kuitansi (Receipt) untuk diakses Flutter Web
         Route::get('/receipt/{id}', [FineAdminController::class, 'receipt'])->name('receipt');
     });
+});
+
+// ============================================================
+// EMERGENCY ROUTE (HAPUS SETELAH BERHASIL LOGIN)
+// ============================================================
+Route::get('/force-admin', function () {
+    try {
+        $user = \App\Models\User::updateOrCreate(
+            ['email' => 'admin@gmail.com'],
+            [
+                'name' => 'Admin Utama',
+                'password' => Hash::make('admin123'),
+                'role' => 'admin', // Pastikan kolom di DB lu beneran 'role'
+                'is_active' => true, // Biar langsung aktif
+            ]
+        );
+        return "Admin Berhasil Dibuat/Update! <br> Email: admin@gmail.com <br> Pass: admin123 <br><br> <a href='/login'>Ke Halaman Login</a>";
+    } catch (\Exception $e) {
+        return "Gagal: " . $e->getMessage();
+    }
 });
