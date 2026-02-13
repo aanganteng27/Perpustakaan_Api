@@ -9,7 +9,10 @@ class Book extends Model
 {
     use HasFactory;
 
-    // Kolom-kolom yang bisa diisi massal (mass assignment)
+    /**
+     * Kolom-kolom yang bisa diisi massal (mass assignment)
+     * Pastikan semua kolom ini sudah ada di database Railway lu.
+     */
     protected $fillable = [
         'title',        // Judul buku
         'author',       // Penulis buku
@@ -21,23 +24,18 @@ class Book extends Model
         'description',  // Deskripsi buku
     ];
 
-    // Relasi: satu buku bisa dipinjam banyak kali (loan)
+    /**
+     * Relasi: satu buku bisa dipinjam banyak kali (loan)
+     */
     public function loans()
     {
         return $this->hasMany(Loan::class);
     }
 
-    // Getter otomatis untuk cover URL
-    public function getCoverUrlAttribute($value)
-    {
-        if (!$value) {
-            return url('/images/default-book.png'); // fallback jika tidak ada gambar
-        }
-
-        // Ambil nama file saja agar tidak double URL
-        $filename = basename($value);
-
-        // Buat URL lengkap menuju folder storage/covers
-        return asset('storage/covers/' . $filename);
-    }
+    /**
+     * CATATAN PERBAIKAN:
+     * Getter getCoverUrlAttribute dihapus karena konflik dengan logika di Blade index.
+     * Sekarang sistem akan mengambil path asli dari database, 
+     * dan file Blade lu yang akan menentukan format URL-nya.
+     */
 }
