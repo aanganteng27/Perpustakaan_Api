@@ -17,3 +17,6 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# Pastikan baris di bawah ini TIDAK ADA atau sudah dihapus:
+# /database/*.sqlite
