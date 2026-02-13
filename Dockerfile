@@ -25,8 +25,6 @@ RUN chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/ht
 RUN echo 'server { \n\
     listen 80; \n\
     root /var/www/html/public; \n\
-    add_header X-Frame-Options "SAMEORIGIN"; \n\
-    add_header X-Content-Type-Options "nosniff"; \n\
     index index.php; \n\
     charset utf-8; \n\
     location / { \n\
@@ -37,14 +35,11 @@ RUN echo 'server { \n\
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name; \n\
         include fastcgi_params; \n\
     } \n\
-    location ~ /\.(?!well-known).* { \n\
-        deny all; \n\
-    } \n\
 }' > /etc/nginx/sites-available/default
 
-# 7. Jalankan pembersihan cache, migrasi, dan start server
-# Kita gunakan path absolut /var/www/html agar tidak bentrok dengan path /app
+# 7. Startup script
 CMD php artisan config:clear && \
+    php artisan storage:link && \
     php artisan migrate --force && \
     service nginx start && \
     php-fpm
