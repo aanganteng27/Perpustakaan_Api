@@ -15,9 +15,8 @@ COPY . .
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
 
-# 5. Setup Database & Permissions
+# 5. Setup Database & Permissions awal
 RUN mkdir -p database storage/logs storage/framework/views storage/framework/sessions storage/framework/cache
-RUN touch database/database.sqlite
 RUN chown -R www-data:www-data /var/www/html
 RUN chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 
@@ -37,8 +36,11 @@ RUN echo 'server { \n\
     } \n\
 }' > /etc/nginx/sites-available/default
 
-# 7. Startup script
-CMD php artisan config:clear && \
+# 7. Startup script: PAKSA buat file database di lokasi production.sqlite
+CMD mkdir -p /var/www/html/database && \
+    touch /var/www/html/database/production.sqlite && \
+    chmod 777 /var/www/html/database/production.sqlite && \
+    php artisan config:clear && \
     php artisan storage:link && \
     php artisan migrate --force && \
     service nginx start && \
