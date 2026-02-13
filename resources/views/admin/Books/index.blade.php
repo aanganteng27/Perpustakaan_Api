@@ -133,7 +133,8 @@
     @endif
 
     <div class="table-container">
-        @if($books->count())
+        {{-- UPDATE LOGIC: Cek apakah $books ada isinya dan bukan null --}}
+        @if(isset($books) && $books->count() > 0)
         <div class="table-responsive">
             <table class="table custom-table table-hover align-middle">
                 <thead>
@@ -151,7 +152,7 @@
                 <tbody>
                     @foreach ($books as $index => $book)
                     <tr>
-                        <td class="text-center fw-bold text-muted">{{ $index + 1 }}</td>
+                        <td class="text-center fw-bold text-muted">{{ ($books->firstItem() ?? 1) + $index }}</td>
                         <td class="text-center">
                             @php
                                 $cover = $book->cover_url;
@@ -180,7 +181,7 @@
                         </td>
                         <td>
                             <span class="small text-muted" title="{{ $book->description }}">
-                                {{ Str::limit($book->description, 45, '...') }}
+                                {{ Str::limit($book->description ?? '-', 45, '...') }}
                             </span>
                         </td>
                         <td class="text-center">
@@ -189,10 +190,10 @@
                             </span>
                         </td>
                         <td class="text-center">
-                            @if($book->stock <= 5)
-                                <span class="badge bg-danger bg-opacity-10 text-danger px-3 rounded-pill fw-bold">{{ $book->stock }}</span>
+                            @if(($book->stock ?? 0) <= 5)
+                                <span class="badge bg-danger bg-opacity-10 text-danger px-3 rounded-pill fw-bold">{{ $book->stock ?? 0 }}</span>
                             @else
-                                <span class="badge bg-success bg-opacity-10 text-success px-3 rounded-pill fw-bold">{{ $book->stock }}</span>
+                                <span class="badge bg-success bg-opacity-10 text-success px-3 rounded-pill fw-bold">{{ $book->stock ?? 0 }}</span>
                             @endif
                         </td>
                         <td class="text-center">
@@ -218,7 +219,7 @@
 
         <div class="d-flex justify-content-between align-items-center mt-4 px-2">
             <div class="text-muted small fw-600">
-                Menampilkan {{ $books->firstItem() }} sampai {{ $books->lastItem() }} dari {{ $books->total() }} buku
+                Menampilkan {{ $books->firstItem() ?? 0 }} sampai {{ $books->lastItem() ?? 0 }} dari {{ $books->total() ?? 0 }} buku
             </div>
             <div>
                 {{ $books->links('pagination::bootstrap-5') }}
