@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Admin\BookAdminController;
 use App\Http\Controllers\Admin\LoanAdminController;
@@ -122,12 +123,30 @@ Route::get('/force-admin', function () {
             [
                 'name' => 'Admin Utama',
                 'password' => Hash::make('admin123'),
-                'role' => 'admin', // Pastikan kolom di DB lu beneran 'role'
-                'is_active' => true, // Biar langsung aktif
+                'role' => 'admin',
+                'is_active' => true,
             ]
         );
         return "Admin Berhasil Dibuat/Update! <br> Email: admin@gmail.com <br> Pass: admin123 <br><br> <a href='/login'>Ke Halaman Login</a>";
     } catch (\Exception $e) {
         return "Gagal: " . $e->getMessage();
+    }
+});
+
+// ============================================================
+// FIX ERROR 500 ROUTE (UNTUK SYMLINK & CLEAR CACHE)
+// ============================================================
+Route::get('/fix-error', function () {
+    try {
+        // Jalankan storage:link via code
+        Artisan::call('storage:link');
+        // Bersihkan cache
+        Artisan::call('cache:clear');
+        Artisan::call('view:clear');
+        Artisan::call('config:clear');
+        
+        return "Fix Selesai! Folder storage sudah terhubung dan cache dibersihkan. <br> <a href='/admin/books'>Coba Buka Menu Buku Lagi</a>";
+    } catch (\Exception $e) {
+        return "Gagal Fix: " . $e->getMessage();
     }
 });
