@@ -36,12 +36,12 @@ RUN echo 'server { \n\
     } \n\
 }' > /etc/nginx/sites-available/default
 
-# 7. Startup script: PAKSA buat file database di lokasi production.sqlite
+# 7. Startup script: Menjamin file DB ada & link storage aman
 CMD mkdir -p /var/www/html/database && \
     touch /var/www/html/database/production.sqlite && \
     chmod 777 /var/www/html/database/production.sqlite && \
     php artisan config:clear && \
-    php artisan storage:link && \
+    (php artisan storage:link || true) && \
     php artisan migrate --force && \
     service nginx start && \
     php-fpm
