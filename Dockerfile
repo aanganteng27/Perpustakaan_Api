@@ -15,7 +15,7 @@ COPY . .
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
 
-# 5. Setup Database & Permissions (PENTING: Kita pakai 777 agar SQLite lancar)
+# 5. Setup Database & Permissions
 RUN mkdir -p database storage/logs storage/framework/views storage/framework/sessions storage/framework/cache
 RUN touch database/database.sqlite
 RUN chown -R www-data:www-data /var/www/html
@@ -42,6 +42,9 @@ RUN echo 'server { \n\
     } \n\
 }' > /etc/nginx/sites-available/default
 
-# 7. Optimasi Laravel & Jalankan Nginx + PHP-FPM
-# Kita tambahkan config:clear agar tidak ada cache yang mengganggu di server
-CMD php artisan config:clear && service nginx start && php-fpm
+# 7. Jalankan pembersihan cache, migrasi, dan start server
+# Kita gunakan path absolut /var/www/html agar tidak bentrok dengan path /app
+CMD php artisan config:clear && \
+    php artisan migrate --force && \
+    service nginx start && \
+    php-fpm
