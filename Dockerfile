@@ -1,26 +1,27 @@
 FROM php:8.2-fpm
 
-# Install dependencies sistem
+# 1. Install dependencies sistem
 RUN apt-get update && apt-get install -y \
     libpng-dev libonig-dev libxml2-dev zip unzip sqlite3 libsqlite3-dev nginx
 
-# Install PHP extensions
+# 2. Install PHP extensions
 RUN docker-php-ext-install pdo_mysql pdo_sqlite mbstring exif pcntl bcmath gd
 
-# Set Working Directory
+# 3. Set Working Directory
 WORKDIR /var/www/html
 COPY . .
 
-# Install Composer
+# 4. Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
 
-# Setup Database & Permissions
-RUN mkdir -p database && touch database/database.sqlite
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
-RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
+# 5. Setup Database & Permissions (PENTING: Kita pakai 777 agar SQLite lancar)
+RUN mkdir -p database storage/logs storage/framework/views storage/framework/sessions storage/framework/cache
+RUN touch database/database.sqlite
+RUN chown -R www-data:www-data /var/www/html
+RUN chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 
-# Copy konfigurasi Nginx (Kita buat perintahnya langsung di sini)
+# 6. Konfigurasi Nginx
 RUN echo 'server { \n\
     listen 80; \n\
     root /var/www/html/public; \n\
@@ -41,5 +42,6 @@ RUN echo 'server { \n\
     } \n\
 }' > /etc/nginx/sites-available/default
 
-# Start Nginx & PHP-FPM
-CMD service nginx start && php-fpm
+# 7. Optimasi Laravel & Jalankan Nginx + PHP-FPM
+# Kita tambahkan config:clear agar tidak ada cache yang mengganggu di server
+CMD php artisan config:clear && service nginx start && php-fpm
